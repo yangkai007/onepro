@@ -2,7 +2,7 @@
 <template>
   <!--首页头部-->
   <header class="msite_header">
-    <!-- 刚刚配置的插槽内容在这里 -->
+    <!-- 配置的插槽内容在这里 -->
     <slot name="left"></slot>
     <span class="header_title">
       <span class="header_title_text ellipsis">{{title}}</span>
@@ -19,6 +19,7 @@ export default {
 
 <style scoped lang='stylus'>
 @import '../../assets/stylus/mixins.styl';
+@import '../../assets/stylus/reset.styl';
 
 .msite_header {
   background-color: $dColor;

@@ -1,315 +1,167 @@
 <!--  -->
 <template>
-  <!--我的-->
-  <div>
-    <section class="profile">
-      <header class="header">
-        <a class="header_title">
-          <span class="header_title_text">我的</span>
-        </a>
-      </header>
-      <section class="profile-number">
-        <a href="javascript:" class="profile-link">
-          <div class="profile_image">
-            <i class="iconfont icon-person"></i>
-          </div>
-          <div class="user-info">
-            <p class="user-info-top">登录/注册</p>
-            <p>
-              <span class="user-icon">
-                <i class="iconfont icon-shouji icon-mobile"></i>
-              </span>
-              <span class="icon-mobile-number">暂无绑定手机号</span>
-            </p>
-          </div>
-          <span class="arrow">
-            <i class="iconfont icon-jiantou1"></i>
-          </span>
-        </a>
-      </section>
-      <section class="profile_info_data border-1px">
-        <ul class="info_data_list">
-          <a href="javascript:" class="info_data_link">
-            <span class="info_data_top">
-              <span>0.00</span>元
-            </span>
-            <span class="info_data_bottom">我的余额</span>
-          </a>
-          <a href="javascript:" class="info_data_link">
-            <span class="info_data_top">
-              <span>0</span>个
-            </span>
-            <span class="info_data_bottom">我的优惠</span>
-          </a>
-          <a href="javascript:" class="info_data_link">
-            <span class="info_data_top">
-              <span>0</span>分
-            </span>
-            <span class="info_data_bottom">我的积分</span>
-          </a>
-        </ul>
-      </section>
-      <section class="profile_my_order border-1px">
-        <!-- 我的订单 -->
-        <a href="javascript:" class="my_order">
-          <span>
-            <i class="iconfont icon-order-s"></i>
-          </span>
-          <div class="my_order_div">
-            <span>我的订单</span>
-            <span class="my_order_icon">
-              <i class="iconfont icon-jiantou1"></i>
-            </span>
-          </div>
-        </a>
-        <!-- 积分商城 -->
-        <a href="javascript:" class="my_order">
-          <span>
-            <i class="iconfont icon-jifen"></i>
-          </span>
-          <div class="my_order_div">
-            <span>积分商城</span>
-            <span class="my_order_icon">
-              <i class="iconfont icon-jiantou1"></i>
-            </span>
-          </div>
-        </a>
-        <!-- 美团外卖会员卡 -->
-        <a href="javascript:" class="my_order">
-          <span>
-            <i class="iconfont icon-vip"></i>
-          </span>
-          <div class="my_order_div">
-            <span>美团外卖会员卡</span>
-            <span class="my_order_icon">
-              <i class="iconfont icon-jiantou1"></i>
-            </span>
-          </div>
-        </a>
-      </section>
-      <section class="profile_my_order border-1px">
-        <!-- 服务中心 -->
-        <a href="javascript:" class="my_order">
-          <span>
-            <i class="iconfont icon-fuwu"></i>
-          </span>
-          <div class="my_order_div">
-            <span>服务中心</span>
-            <span class="my_order_icon">
-              <i class="iconfont icon-jiantou1"></i>
-            </span>
-          </div>
-        </a>
-      </section>
+  <!--搜索-->
+  <section class="search">
+    <HeaderTop title="搜索">
+      <template v-slot:left></template>
+    </HeaderTop>
+     <form class="search_form" @submit.prevent="search">
+            <input type="search" name="search" placeholder="请输入商家或美食名称" 
+            class="search_input" v-model="keyword">
+            <input type="submit" name="submit" class="search_submit">
+          </form>
+    <!-- 搜索模板 -->
+    <section class="list" v-if="!noSearchShops">
+      <ul class="list_container">
+        <!--:to="'/shop?id='+item.id"-->
+        <router-link :to="{path:'/shop', query:{id:item.id}}" tag="li"
+                     v-for="item in searchShops" :key="item.id" class="list_li">
+          <section class="item_left">
+            <img :src="imgBaseUrl + item.image_path" class="restaurant_img">
+          </section>
+          <section class="item_right">
+            <div class="item_right_text">
+              <p>
+                <span>{{item.name}}</span>
+              </p>
+              <p>月售 {{item.month_sales||item.recent_order_num}} 单</p>
+              <p>{{item.delivery_fee||item.float_minimum_order_amount}} 元起送 / 距离{{item.distance}}</p>
+            </div>
+          </section>
+        </router-link>
+      </ul>
     </section>
-  </div>
+    <div class="search_none" v-else>很抱歉！无搜索结果</div>
+  </section>
 </template>
 
 <script>
-export default {};
+// import HeaderTop from "@/components/HeaderTop/HeaderTop.vue";
+import HeaderTop from "../../components/HeaderTop/HeaderTop";
+import {mapState} from 'vuex'
+
+export default {
+  components: {
+    HeaderTop,
+  },
+  data(){
+    return{
+      keyword:'',
+      imgBaseUrl: 'http://cangdu.org:8001/img/',
+      noSearchShops: false
+    }
+  },
+  computed: {
+      ...mapState(['searchShops'])
+    },
+  methods:{
+    search () {
+        // 得到搜索关键字
+        const keyword = this.keyword.trim()
+        // 进行搜索
+        if(keyword) {
+          this.$store.dispatch('searchShops', keyword)
+        }
+      }
+  },
+   watch: {
+      searchShops (value) {
+        if(!value.length) { // 没有数据
+          this.noSearchShops = true
+        } else {// 有数据
+          this.noSearchShops = false
+        }
+      }
+    },
+};
 </script>
 
 <style scoped lang='stylus'>
 @import '../../assets/stylus/mixins.styl';
 
-&.profile {
+&.search {
   width: 100%;
+  height: 100%;
+  overflow: hidden;
 
-  .profile-number {
-    margin-top: 45.5px;
+  .search_form {
+    clearFix();
+    margin-top: 45px;
+    background-color: #fff;
+    padding: 12px 8px;
 
-    .profile-link {
-      clearFix();
-      position: relative;
-      display: block;
-      background: $dColor;
-      padding: 20px 10px;
+    input {
+      height: 35px;
+      padding: 0 4px;
+      border-radius: 2px;
+      font-weight: bold;
+      outline: none;
 
-      .profile_image {
+      &.search_input {
         float: left;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        overflow: hidden;
-        vertical-align: top;
-
-        .icon-person {
-          background: #e4e4e4;
-          font-size: 62px;
-        }
+        width: 79%;
+        border: 4px solid #f2f2f2;
+        font-size: 14px;
+        color: #333;
+        background-color: #f2f2f2;
       }
 
-      .user-info {
-        float: left;
-        margin-top: 8px;
-        margin-left: 15px;
+      &.search_submit {
+        float: right;
+        width: 18%;
+        border: 4px solid #0085ff;
+        font-size: 16px;
+        color: #fff;
+        background-color: #0085ff;
+      }
+    }
+  }
 
-        p {
-          font-weight: 700;
-          font-size: 18px;
-          color: #fff;
+  .list {
+    .list_container {
+      background-color: #fff;
 
-          &.user-info-top {
-            padding-bottom: 8px;
+      .list_li {
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+        border-bottom: 1px solid $bc;
+
+        .item_left {
+          margin-right: 10px;
+
+          .restaurant_img {
+            width: 50px;
+            height: 50px;
+            display: block;
           }
+        }
 
-          .user-icon {
-            display: inline-block;
-            margin-left: -15px;
-            margin-right: 5px;
-            width: 20px;
-            height: 20px;
+        .item_right {
+          font-size: 12px;
+          flex: 1;
 
-            .icon-mobile {
-              font-size: 30px;
-              vertical-align: text-top;
+          .item_right_text {
+            p {
+              line-height: 12px;
+              margin-bottom: 6px;
+
+              &:last-child {
+                margin-bottom: 0;
+              }
             }
           }
-
-          .icon-mobile-number {
-            font-size: 14px;
-            color: #fff;
-          }
-        }
-      }
-
-      .arrow {
-        width: 12px;
-        height: 12px;
-        position: absolute;
-        right: 15px;
-        top: 40%;
-
-        .icon-jiantou1 {
-          color: #fff;
-          font-size: 5px;
         }
       }
     }
   }
 
-  .profile_info_data {
-    bottom-border-1px(#e4e4e4);
-    width: 100%;
-    background: #fff;
-    overflow: hidden;
-
-    .info_data_list {
-      clearFix();
-
-      .info_data_link {
-        float: left;
-        width: 33%;
-        text-align: center;
-        border-right: 1px solid #f1f1f1;
-
-        .info_data_top {
-          display: block;
-          width: 100%;
-          font-size: 14px;
-          color: #333;
-          padding: 15px 5px 10px;
-
-          span {
-            display: inline-block;
-            font-size: 30px;
-            color: #f90;
-            font-weight: 700;
-            line-height: 30px;
-          }
-        }
-
-        .info_data_bottom {
-          display: inline-block;
-          font-size: 14px;
-          color: #666;
-          font-weight: 400;
-          padding-bottom: 10px;
-        }
-      }
-
-      .info_data_link:nth-of-type(2) {
-        .info_data_top {
-          span {
-            color: #ff5f3e;
-          }
-        }
-      }
-
-      .info_data_link:nth-of-type(3) {
-        border: 0;
-
-        .info_data_top {
-          span {
-            color: #6ac20b;
-          }
-        }
-      }
-    }
-  }
-
-  .profile_my_order {
-    top-border-1px(#e4e4e4);
-    margin-top: 10px;
-    background: #fff;
-
-    .my_order {
-      display: flex;
-      align-items: center;
-      padding-left: 15px;
-
-      >span {
-        display: flex;
-        align-items: center;
-        width: 20px;
-        height: 20px;
-
-        >.iconfont {
-          margin-left: -10px;
-          font-size: 30px;
-        }
-
-        .icon-order-s {
-          color: $dColor;
-        }
-
-        .icon-jifen {
-          color: #ff5f3e;
-        }
-
-        .icon-vip {
-          color: #f90;
-        }
-
-        .icon-fuwu {
-          color: $dColor;
-        }
-      }
-
-      .my_order_div {
-        width: 100%;
-        border-bottom: 1px solid #f1f1f1;
-        padding: 18px 10px 18px 0;
-        font-size: 16px;
-        color: #333;
-        display: flex;
-        justify-content: space-between;
-
-        span {
-          display: block;
-        }
-
-        .my_order_icon {
-          width: 10px;
-          height: 10px;
-
-          .icon-jiantou1 {
-            color: #bbb;
-            font-size: 10px;
-          }
-        }
-      }
-    }
+  .search_none {
+    margin: 0 auto;
+    color: #333;
+    background-color: #fff;
+    text-align: center;
+    margin-top: 0.125rem;
   }
 }
 </style>
